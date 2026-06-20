@@ -24,7 +24,7 @@ export function useRouteWeather() {
       const leafletPolyline = rawCoordinates.map(([lng, lat]) => [lat, lng]);
       setRoutePolyline(leafletPolyline);
 
-      const backendResponse = await fetch('http://localhost:5000/api/weather-route', {
+      const backendResponse = await fetch('https://route-weather-ai-optimizer.onrender.com/api/weather-route', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ coordinates: rawCoordinates }), 
