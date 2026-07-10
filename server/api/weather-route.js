@@ -23,7 +23,7 @@ export async function handleRouteWeather(req, res) {
         
         const response = await axios.get(`${WEATHER_AI_BASE_URL}/v1/hourly`, {
           params: { lat, lon: lng },
-          headers: { Authorization: `Bearer ${"wai_85bac0.88c7c8d586c163675dbc0f80c843d812600db14ce8653207"}` }
+          headers: { Authorization: `Bearer ${API_KEY}` }
         });
         
         const rawData = response.data;
