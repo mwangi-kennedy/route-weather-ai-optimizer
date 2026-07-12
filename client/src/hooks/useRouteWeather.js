@@ -1,18 +1,19 @@
 import { useState } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://weather-route-backend.onrender.com';
+
 export function useRouteWeather() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [routePolyline, setRoutePolyline] = useState([]);
   const [weatherWaypoints, setWeatherWaypoints] = useState([]);
-  const [distance, setDistance] = useState(null); // Step 1: Add state track for distance
+  const [distance, setDistance] = useState(null);
 
   const calculateRouteAndWeather = async (startCoords, endCoords) => {
     setLoading(true);
     setError(null);
-    setDistance(null); 
+    setDistance(null);
     try {
-
       const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${startCoords.lng},${startCoords.lat};${endCoords.lng},${endCoords.lat}?overview=full&geometries=geojson`;
       
       const routeResponse = await fetch(osrmUrl);
@@ -29,7 +30,8 @@ export function useRouteWeather() {
       const leafletPolyline = rawCoordinates.map(([lng, lat]) => [lat, lng]);
       setRoutePolyline(leafletPolyline);
 
-      const backendResponse = await fetch('http://localhost:5000/api/weather-route', {
+      // Clean, dynamic URL string injection
+      const backendResponse = await fetch(`${API_BASE_URL}/api/weather-route`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ coordinates: rawCoordinates }), 
