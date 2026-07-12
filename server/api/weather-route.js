@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { sampleRouteCoordinates } from '../utils/sampler.js';
 
-const WEATHER_AI_BASE_URL = 'https://api.weather-ai.co';
-const API_KEY = process.env.WEATHER_AI_API_KEY;
+const OPEN_METEO_BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -20,26 +19,40 @@ export async function handleRouteWeather(req, res) {
       try {
         await sleep(index * 80);
 
-        
-        const response = await axios.get(`${WEATHER_AI_BASE_URL}/v1/hourly`, {
-          params: { lat, lon: lng },
-          headers: { Authorization: `Bearer ${API_KEY}` }
+        const response = await axios.get(OPEN_METEO_BASE_URL, {
+          params: {
+            latitude: lat,
+            longitude: lng,
+            hourly: 'temperature_2m,wind_speed_10m,weather_code',
+            wind_speed_unit: 'kmh', 
+            forecast_days: 1
+          },
+          timeout: 5000 
         });
         
         const rawData = response.data;
         
-        
-        const currentHourData = rawData.hourly && rawData.hourly.length > 0 ? rawData.hourly[0] : null;
+        const temp = rawData.hourly?.temperature_2m?.[0] ?? 'N/A';
+        const windSpeed = rawData.hourly?.wind_speed_10m?.[0] ?? 0;
+        const weatherCode = rawData.hourly?.weather_code?.[0] ?? 0;
+
+        let conditionText = 'Clear';
+        if (weatherCode === 3) {
+          conditionText = 'Overcast';
+        } else if (weatherCode === 1 || weatherCode === 2) {
+          conditionText = 'Partly Cloudy';
+        } else if ((weatherCode >= 51 && weatherCode <= 55) || (weatherCode >= 61 && weatherCode <= 65)) {
+          conditionText = 'Light Rain';
+        } else if ((weatherCode >= 66 && weatherCode <= 67) || (weatherCode >= 71 && weatherCode <= 77) || (weatherCode >= 80 && weatherCode <= 86)) {
+          conditionText = 'Heavy Rain';
+        }
 
         const normalizedWeather = {
           current: {
-            temp: currentHourData ? currentHourData.temperature : 'N/A',
-            wind_kph: currentHourData ? currentHourData.wind_speed : 0,
+            temp: temp,
+            wind_kph: windSpeed,
             condition: {
-              text: currentHourData?.icon?.includes('overcast') ? 'Overcast' :
-                    currentHourData?.icon?.includes('cloudy') ? 'Partly Cloudy' :
-                    currentHourData?.icon?.includes('drizzle') ? 'Light Rain' : 
-                    currentHourData?.icon?.includes('rain') ? 'Light Rain' : 'Clear'
+              text: conditionText
             }
           }
         };

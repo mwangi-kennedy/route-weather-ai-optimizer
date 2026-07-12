@@ -7,8 +7,7 @@ import L from 'leaflet';
 
 const START_VEHICLE_SVG = `
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3B82F6" width="34px" height="34px" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));">
-    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" stroke="#fff" stroke-width="1" style="display:none;"/>
-    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1-1-1s-1 .17-1 1V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
   </svg>
 `;
 
@@ -41,8 +40,7 @@ function MapBoundsController({ polyline }) {
 }
 
 export default function App() {
-  const { calculateRouteAndWeather, routePolyline, weatherWaypoints, loading, error: apiError } = useRouteWeather();
-  
+  const { calculateRouteAndWeather, routePolyline, weatherWaypoints, distance, loading, error: apiError } = useRouteWeather();
 
   const [startQuery, setStartQuery] = useState('');
   const [endQuery, setEndQuery] = useState('');
@@ -185,6 +183,37 @@ export default function App() {
             {geocoding ? 'Locating Waypoints...' : loading ? 'Analyzing Weather...' : 'Calculate Route Conditions'}
           </button>
         </form>
+
+        {/* NEW DISTANCE METRIC UI COMPONENT */}
+        {distance && !systemLoading && (
+          <div style={{
+            background: 'linear-gradient(90deg, #1E293B 0%, #0F172A 100%)',
+            padding: '16px',
+            borderRadius: '12px',
+            border: '1px solid #334155',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            <div>
+              <span style={{ display: 'block', fontSize: '11px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 'bold' }}>
+                Total Route Track
+              </span>
+              <span style={{ fontSize: '24px', fontWeight: '800', color: '#60A5FA' }}>
+                {distance} <span style={{ fontSize: '14px', fontWeight: '500', color: '#9CA3AF' }}>km</span>
+              </span>
+            </div>
+            <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '10px', borderRadius: '50%', color: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: '22px', height: '22px' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12.25 12.25m-7.25 0a7.25 7.25 0 1 1 14.5 0a7.25 7.25 0 1 1 -14.5 0M9 9l6 6M15 9l-6 6" style={{ display: 'none' }} />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+          </div>
+        )}
 
         {activeError && <div style={{ color: '#FCA5A5', fontSize: '13px', background: '#7F1D1D', padding: '12px', borderRadius: '8px', border: '1px solid #991B1B' }}>⚠️ {activeError}</div>}
 

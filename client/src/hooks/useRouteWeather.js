@@ -5,10 +5,12 @@ export function useRouteWeather() {
   const [error, setError] = useState(null);
   const [routePolyline, setRoutePolyline] = useState([]);
   const [weatherWaypoints, setWeatherWaypoints] = useState([]);
+  const [distance, setDistance] = useState(null); // Step 1: Add state track for distance
 
   const calculateRouteAndWeather = async (startCoords, endCoords) => {
     setLoading(true);
     setError(null);
+    setDistance(null); 
     try {
 
       const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${startCoords.lng},${startCoords.lat};${endCoords.lng},${endCoords.lat}?overview=full&geometries=geojson`;
@@ -20,11 +22,14 @@ export function useRouteWeather() {
         throw new Error('No route found between selected coordinates.');
       }
 
+      const meters = routeData.routes[0].distance;
+      setDistance((meters / 1000).toFixed(1));
+
       const rawCoordinates = routeData.routes[0].geometry.coordinates;
       const leafletPolyline = rawCoordinates.map(([lng, lat]) => [lat, lng]);
       setRoutePolyline(leafletPolyline);
 
-      const backendResponse = await fetch('https://route-weather-ai-optimizer.onrender.com/api/weather-route', {
+      const backendResponse = await fetch('http://localhost:5000/api/weather-route', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ coordinates: rawCoordinates }), 
@@ -42,5 +47,5 @@ export function useRouteWeather() {
     }
   };
 
-  return { calculateRouteAndWeather, routePolyline, weatherWaypoints, loading, error };
+  return { calculateRouteAndWeather, routePolyline, weatherWaypoints, distance, loading, error };
 }
